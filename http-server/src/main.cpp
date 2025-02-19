@@ -1,7 +1,9 @@
+#include <string>
 #include <thread>
 #include <sys/socket.h>
 #include "servlet/servlet.cpp"
 #include "server/server.cpp"
+#include "utils/number-utils.h"
 
 int main(int argc, char *argv[])
 {
@@ -18,18 +20,20 @@ int main(int argc, char *argv[])
         std::cout << "Argument " << i << " : " << argv[i] << std::endl;
     }
 
-    struct sockaddr_in server_addr;
+    int port = app::str_to_int(argv[1]);
 
-    Server server = Server(argv[1]);
-    int socket_fd = server.start(server_addr);
+    app::Server server = app::Server(port);
+
+    server.start();
+
+    int socket_fd = server.getSocketFd();
+    sockaddr_in socket_in = server.getSocketIn();
 
     socklen_t client_addr_size = sizeof(struct sockaddr_in);
 
-    log::logServerAddr(server_addr);
-
     while (1)
     {
-        int client_socket_fd = accept(socket_fd, (struct sockaddr *)&server_addr, &client_addr_size);
+        int client_socket_fd = accept(socket_fd, (struct sockaddr *)&socket_in, &client_addr_size);
         if (client_socket_fd < 0)
         {
             std::cerr << "Failed to accept client request." << std::endl;

@@ -10,16 +10,50 @@
 #include <sys/epoll.h>
 #include <sys/wait.h>
 
-class Server
+namespace app
 {
-    int port;
 
-public:
-    Server(char *charPort);
+    class Server
+    {
+    private:
+        int port, socket_fd;
+        sockaddr_in socket_in;
 
-    int start(sockaddr_in &server_address);
+    public:
+        Server(int port) : port(port) {};
 
-    void stop();
-};
+        void start();
+
+        void stop();
+
+        int &getSocketFd()
+        {
+            return socket_fd;
+        }
+
+        sockaddr_in &getSocketIn()
+        {
+            return socket_in;
+        }
+
+        ~Server() { stop(); };
+    };
+
+    class ServerException : public std::exception
+    {
+    private:
+        char *message;
+
+    public:
+        ServerException(char *msg) : message(msg) {}
+
+    public:
+        char *what()
+        {
+            return message;
+        }
+    };
+
+}
 
 #endif
