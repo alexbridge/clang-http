@@ -5,13 +5,12 @@ std::string HttpResponse::frameHttpResponse(
     std::string status_code,
     std::string status_message,
     std::map<std::string, std::string> headers,
-    std::string body,
-    std::string mimetype)
+    std::string body)
 {
     // TODO
     //  status code , status msg , headers , body ko response formate me frame krna hai.
 
-    headers[httpheader::CONTENT_TYPE] = mimetype;
+    headers[httpheader::CONTENT_TYPE] = "application/json";
     headers[httpheader::CONTENT_LENGTH] = std::to_string(body.length());
 
     std::ostringstream buffer;

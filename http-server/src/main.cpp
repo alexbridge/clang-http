@@ -1,9 +1,9 @@
 #include <string>
 #include <thread>
 #include <sys/socket.h>
-#include "servlet/servlet.cpp"
-#include "server/server.cpp"
-#include "utils/number-utils.h"
+#include "servlet/servlet.h"
+#include "server/server.h"
+#include "utils/utils.h"
 
 int main(int argc, char *argv[])
 {
@@ -20,13 +20,16 @@ int main(int argc, char *argv[])
         std::cout << "Argument " << i << " : " << argv[i] << std::endl;
     }
 
-    int port = app::str_to_int(argv[1]);
+    int port = app::utils::str_to_int(argv[1]);
 
     app::Server server = app::Server(port);
 
     server.start();
 
     int socket_fd = server.getSocketFd();
+
+    std::cout << "Socket FD: " << socket_fd << std::endl;
+
     sockaddr_in socket_in = server.getSocketIn();
 
     socklen_t client_addr_size = sizeof(struct sockaddr_in);
@@ -40,8 +43,12 @@ int main(int argc, char *argv[])
             exit(1);
         }
 
-        std::thread clientThread(servlet::handleClient, client_socket_fd);
-        clientThread.detach();
+        std::cout << "Client socket FD: " << client_socket_fd << std::endl;
+
+        servlet::handleClient(client_socket_fd);
+
+        // std::thread clientThread(servlet::handleClient, client_socket_fd);
+        // clientThread.detach();
     }
 
     return 0;

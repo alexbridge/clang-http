@@ -11,8 +11,7 @@
 #include <sys/wait.h>
 #include "../request/request.h"
 #include "../response/response.h"
-#include "../server/server.h"
-#include "../utils/log-utils.h"
+#include "../utils/utils.h"
 
 namespace servlet
 {

@@ -2,6 +2,7 @@
 #define CLANG_SERVER_H
 
 #include <iostream>
+#include <stdexcept>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -9,6 +10,7 @@
 #include <string>
 #include <sys/epoll.h>
 #include <sys/wait.h>
+#include "../utils/utils.h"
 
 namespace app
 {
@@ -37,21 +39,6 @@ namespace app
         }
 
         ~Server() { stop(); };
-    };
-
-    class ServerException : public std::exception
-    {
-    private:
-        char *message;
-
-    public:
-        ServerException(char *msg) : message(msg) {}
-
-    public:
-        char *what()
-        {
-            return message;
-        }
     };
 
 }

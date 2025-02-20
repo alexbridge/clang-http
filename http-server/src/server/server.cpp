@@ -7,7 +7,7 @@ namespace app
         socket_fd = socket(AF_INET, SOCK_STREAM, 0);
         if (socket_fd < 0)
         {
-            throw new ServerException(new char[]{"Failed to create server socket"});
+            throw std::invalid_argument("Failed to create server socket");
         }
 
         socket_in.sin_family = AF_INET;
@@ -16,13 +16,15 @@ namespace app
 
         if (bind(socket_fd, (struct sockaddr *)&socket_in, sizeof(socket_in)) < 0)
         {
-            throw new ServerException(new char[]{"Failed to bind server socket"});
+            throw std::invalid_argument("Failed to bind server socket");
         }
 
         if (listen(socket_fd, 5) < 0)
         {
-            throw new ServerException(new char[]{"Failed to listen on server socket"});
+            throw std::invalid_argument("Failed to listen on server socket");
         };
+
+        app::log::log(socket_in);
     };
 
     void Server::stop()

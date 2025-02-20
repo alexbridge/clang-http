@@ -16,8 +16,6 @@ public:
       std::map<std::string, std::string> headers;
 
       void parseRequest(const std::string &raw_request);
-      std::string readHtmlFile(const std::string &path);
-      std::string getMimeType(const std::string &path);
 };
 
 #endif

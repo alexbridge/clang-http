@@ -19,8 +19,7 @@ public:
         std::string status_code,
         std::string status_message,
         std::map<std::string, std::string> headers,
-        std::string body,
-        std::string mime_type);
+        std::string body);
 };
 
 #endif

@@ -1,5 +1,4 @@
 #include "request.h"
-#include "../http/mime-type.h"
 
 void HttpRequest::parseRequest(const std::string &raw_request)
 {
@@ -37,37 +36,4 @@ void HttpRequest::parseRequest(const std::string &raw_request)
     // mujhe ab method mil gya hai and path mil gya hai ab mai path me se file ka name nikaalunga aur
     // html file ko open karke uska content read karunga.
     // iske liye mai ek methon banaunga readhtmlFile().
-}
-
-std::string HttpRequest::readHtmlFile(const std::string &path)
-{
-    // TODO
-    // ab html file me se content read krna hai.
-    // iske liye hume fstream use krna padega.
-    std::string file_name = path.substr(1, path.length());
-
-    std::ifstream file("../" + file_name); // ifstream used for reading file if exists.
-    int flag = 0;
-    if (!file)
-    {
-        flag = 1;
-        std::cerr << "File not found." << std::endl;
-    }
-
-    // std::cout<<"file found"<<std::endl;
-    if (flag == 0)
-    {
-        std::stringstream buffer;
-        buffer << file.rdbuf();
-        return buffer.str();
-    }
-
-    return "";
-}
-
-std::string HttpRequest::getMimeType(const std::string &path)
-{
-    std::string fileExtension = path.substr(path.find_last_of(".") + 1);
-    // std::cout<<fileExtension<<std::endl;
-    return mimetype::MIME_TYPES[fileExtension];
 }
