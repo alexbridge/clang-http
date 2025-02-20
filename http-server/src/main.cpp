@@ -1,4 +1,5 @@
 #include <string>
+#include <atomic>
 #include <thread>
 #include <chrono>
 #include <sys/socket.h>
@@ -35,7 +36,7 @@ int main(int argc, char *argv[])
 
     socklen_t client_addr_size = sizeof(struct sockaddr_in);
 
-    std::atomic_int requests = 0;
+    std::atomic_int requests{0};
 
     while (1)
     {
