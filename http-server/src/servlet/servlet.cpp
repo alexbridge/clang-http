@@ -11,7 +11,7 @@ namespace servlet
         HttpRequest req = HttpRequest();
         req.parseRequest(client_req_buffer);
 
-        app::log::log(req);
+        // app::log::log(req);
 
         HttpResponse res = HttpResponse();
         std::string body = req.path;

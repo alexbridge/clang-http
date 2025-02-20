@@ -1,5 +1,6 @@
 #include <string>
 #include <thread>
+#include <chrono>
 #include <sys/socket.h>
 #include "servlet/servlet.h"
 #include "server/server.h"
@@ -34,21 +35,22 @@ int main(int argc, char *argv[])
 
     socklen_t client_addr_size = sizeof(struct sockaddr_in);
 
+    std::atomic_int requests = 0;
+
     while (1)
     {
+        requests++;
         int client_socket_fd = accept(socket_fd, (struct sockaddr *)&socket_in, &client_addr_size);
+
+        std::cout << "[" << requests << "]: memory used: " << app::log::usedRem() << "\r" << std::flush;
+
         if (client_socket_fd < 0)
         {
             std::cerr << "Failed to accept client request." << std::endl;
             exit(1);
         }
 
-        std::cout << "Client socket FD: " << client_socket_fd << std::endl;
-
-        servlet::handleClient(client_socket_fd);
-
-        // std::thread clientThread(servlet::handleClient, client_socket_fd);
-        // clientThread.detach();
+        std::thread(servlet::handleClient, std::ref(client_socket_fd)).detach();
     }
 
     return 0;

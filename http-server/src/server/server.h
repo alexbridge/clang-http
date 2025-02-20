@@ -19,7 +19,7 @@ namespace app
     {
     private:
         int port, socket_fd;
-        sockaddr_in socket_in;
+        struct sockaddr_in socket_in;
 
     public:
         Server(int port) : port(port) {};
@@ -33,7 +33,7 @@ namespace app
             return socket_fd;
         }
 
-        sockaddr_in &getSocketIn()
+        struct sockaddr_in &getSocketIn()
         {
             return socket_in;
         }

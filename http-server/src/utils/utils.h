@@ -7,6 +7,8 @@
 #include <arpa/inet.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include "sys/types.h"
+#include "sys/sysinfo.h"
 #include "../request/request.h"
 
 namespace app
@@ -16,6 +18,8 @@ namespace app
         void log(const sockaddr_in &server_addr);
 
         void log(const HttpRequest req);
+
+        long long usedRem();
     }
 
     namespace utils
