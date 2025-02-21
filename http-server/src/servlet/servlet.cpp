@@ -4,9 +4,16 @@ namespace servlet
 {
     void handleClient(int &socket_fd)
     {
+        http::message::MessageParser parser;
+        http::message::HttpMessage message = parser.parse();
+
+        std::stringstream stream = std::istream(socket_fd);
+
         char client_req_buffer[1024];
 
-        read(socket_fd, client_req_buffer, 1024);
+        read(socket_fd, client_req_buffer, std::string::npos);
+
+        std::string::npos;
 
         HttpRequest req = HttpRequest();
         req.parseRequest(client_req_buffer);

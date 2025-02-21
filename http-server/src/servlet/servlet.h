@@ -12,6 +12,7 @@
 #include "../request/request.h"
 #include "../response/response.h"
 #include "../utils/utils.h"
+#include "../http/message-parser.h"
 
 namespace servlet
 {
