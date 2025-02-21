@@ -1,7 +1,8 @@
 #ifndef CLANG_UTILS_LOG_H
 #define CLANG_UTILS_LOG_H
 
-#include <string.h>
+#include <string>
+#include <algorithm>
 #include <thread>
 #include <iostream>
 #include <arpa/inet.h>
@@ -9,24 +10,20 @@
 #include <netinet/in.h>
 #include "sys/types.h"
 #include "sys/sysinfo.h"
-#include "../request/request.h"
 
 namespace app
 {
-    namespace log
-    {
-        void log(const sockaddr_in &server_addr);
-
-        void log(const HttpRequest req);
-
-        long long usedRem();
-    }
 
     namespace utils
     {
+        long long usedRem();
         int str_to_int(std::string &str);
 
         int str_to_int(char *str);
+
+        void trim(std::string &str);
+        void ltrim(std::string &str);
+        void rtrim(std::string &str);
     }
 }
 

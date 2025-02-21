@@ -12,15 +12,7 @@
 #include <algorithm>
 #include <cctype>
 #include <locale>
-
-// trim from end (in place)
-void rtrim(std::string &s)
-{
-    s.erase(std::find_if(s.rbegin(), s.rend(), [](unsigned char ch)
-                         { return !std::isspace(ch); })
-                .base(),
-            s.end());
-}
+#include "../utils/utils.h"
 
 class Socket
 {
@@ -43,7 +35,7 @@ public:
         char buffer[1024] = {0};
         int n = read(sock, buffer, sizeof(buffer));
         std::string str = std::string(buffer, n);
-        rtrim(str);
+        app::utils::trim(str);
         return str;
     }
     // Output to socket
@@ -149,7 +141,7 @@ int main(int argc, char const *argv[])
                 in = conn.rx();
 
                 std::string lc = std::string(in);
-                rtrim(lc);
+                app::utils::trim(lc);
                 std::transform(lc.begin(), lc.end(), lc.begin(), ::tolower);
 
                 if (lc.find("exit") != std::string::npos)

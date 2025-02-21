@@ -3,7 +3,7 @@
         {
             "name": "Linux",
             "includePath": [
-                "${workspaceFolder}",
+                "${workspaceFolder}/**",
                 "/usr/include/c++/14.2.1",
                 "/usr/include"
             ],

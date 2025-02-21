@@ -7,7 +7,7 @@ build-app:
 	./app
 
 build-sample:
-	@clang++ -std=c++17 samples/sample.cpp -o sample
+	@clang++ -std=c++17 utils/string.cpp samples/sample.cpp -o sample
 	./sample
 
 HTTP_ALL_CPP := $$(find ./http-server -name '*.cpp')
