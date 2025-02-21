@@ -84,7 +84,7 @@ public:
     SocketServer(unsigned short port)
     {
         // Forcefully attaching socket to the port
-        int options = setsockopt(
+        int const options = setsockopt(
             server.getSocket(),
             SOL_SOCKET,
             SO_REUSEADDR | SO_REUSEPORT,
@@ -155,8 +155,6 @@ int main(int argc, char const *argv[])
 
                 conn.tx("Server got: " + in + "\n");
             }
-            while (in != "exit")
-                ;
         }
     }
     catch (runtime_error &e)
