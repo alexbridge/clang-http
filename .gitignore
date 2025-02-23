@@ -1,3 +1,5 @@
 app
 app-server
 sample
+*.o
+build
