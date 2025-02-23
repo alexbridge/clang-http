@@ -12,7 +12,7 @@ namespace http
         public:
             MessageParser();
 
-            HttpMessage parse(std::istream body);
+            HttpMessage parse(std::string_view body);
         };
     }
 }

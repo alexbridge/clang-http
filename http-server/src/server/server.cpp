@@ -23,8 +23,6 @@ namespace app
         {
             throw std::invalid_argument("Failed to listen on server socket");
         };
-
-        app::log::log(socket_in);
     };
 
     void Server::stop()

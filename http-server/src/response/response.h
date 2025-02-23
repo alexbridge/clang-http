@@ -7,19 +7,19 @@
 #include <sstream>
 #include <iostream>
 
-class HttpResponse
+namespace http
 {
-    std::string status_code;
-    std::string status_message;
-    std::map<std::string, std::string> headers;
-    std::string body;
 
-public:
-    std::string frameHttpResponse(
-        std::string status_code,
-        std::string status_message,
-        std::map<std::string, std::string> headers,
-        std::string body);
-};
+    namespace response
+    {
+        struct HttpResponse
+        {
+            std::string status_code;
+            std::string status_message;
+            std::map<std::string, std::string> headers;
+            std::string body;
+        };
+    }
+}
 
 #endif

@@ -5,7 +5,7 @@ namespace http
     namespace message
     {
         MessageParser::MessageParser() {}
-        HttpMessage MessageParser::parse(std::istream body)
+        HttpMessage MessageParser::parse(std::string_view body)
         {
             return HttpMessage{
                 http::method::GET,

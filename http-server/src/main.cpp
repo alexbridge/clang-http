@@ -3,9 +3,8 @@
 #include <thread>
 #include <chrono>
 #include <sys/socket.h>
-#include "servlet/servlet.h"
 #include "server/server.h"
-#include "utils/utils.h"
+#include "../../utils/utils.h"
 
 int main(int argc, char *argv[])
 {
@@ -43,7 +42,7 @@ int main(int argc, char *argv[])
         requests++;
         int client_socket_fd = accept(socket_fd, (struct sockaddr *)&socket_in, &client_addr_size);
 
-        std::cout << "[" << requests << "]: memory used: " << app::log::usedRem() << "\r" << std::flush;
+        std::cout << "Request: [" << requests << "]" << "\r" << std::flush;
 
         if (client_socket_fd < 0)
         {
@@ -51,7 +50,9 @@ int main(int argc, char *argv[])
             exit(1);
         }
 
-        std::thread(servlet::handleClient, std::ref(client_socket_fd)).detach();
+        close(client_socket_fd);
+
+        // std::thread(servlet::handleClient, std::ref(client_socket_fd)).detach();
     }
 
     return 0;

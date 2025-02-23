@@ -133,6 +133,8 @@ int main(int argc, char const *argv[])
 
         while (true)
         {
+            cout << "Start socket server" << endl;
+
             SocketClient conn = srv.waitForConnection();
 
             std::string in;
