@@ -1,9 +1,10 @@
-#ifndef CLANG_UTILS_LOG_H
-#define CLANG_UTILS_LOG_H
+#ifndef CLANG_UTILS_H
+#define CLANG_UTILS_H
 
 #include <string>
 #include <algorithm>
 #include <thread>
+#include <locale>
 #include <iostream>
 #include <arpa/inet.h>
 #include <sys/socket.h>
@@ -19,7 +20,7 @@ namespace app
         long long usedRem();
         int str_to_int(std::string &str);
 
-        int str_to_int(char *str);
+        int str_to_int(char const *str);
 
         void trim(std::string &str);
         void ltrim(std::string &str);

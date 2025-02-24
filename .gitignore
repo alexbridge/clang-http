@@ -1,5 +1,6 @@
 app
 app-server
 sample
+socket-server
 *.o
 build
