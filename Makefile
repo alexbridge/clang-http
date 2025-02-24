@@ -1,19 +1,22 @@
 .SHELL := /bin/bash
 
 CCC := clang++
-CCC_COMPILE := -std=c++17 -c
+CCC_OPTS := -std=c++17
+CCC_OPTS_COMPILE := $(CCC_OPTS) -c
 
 BUILDER := docker run -it -v .:/app -w /app silkeh/clang:16
 DOCKER_DEBIAN_12_IT := docker run -it -v .:/app -w /app debian:sid-slim
 DOCKER_DEBIAN_12 := docker run -v .:/app -w /app -p 8090:8090 debian:12-slim
+
+ALL_CPP := $$(find . -name "*.cpp" ! -name "main.cpp" ! -name "app.cpp" ! -name "sample.cpp")
 
 build-app:
 	@clang++ -std=c++17 app.cpp -o app
 	./app
 
 build-sample-alone:
-	@clang++ -std=c++17 utils/string.cpp samples/sample.cpp -o sample
-	./sample
+	@echo $(ALL_CPP)
+	@$(CCC) $(CCC_OPTS) $(ALL_CPP) samples/sample.cpp -o sample
 
 HTTP_ALL_CPP := $$(find ./http-server -name '*.cpp')
 
@@ -34,12 +37,14 @@ o_files := $(patsubst %.cpp,build/%.o,$(cpp_files))
 
 build/%.o: %.cpp
 	@[ -d "$(@D)" ] || mkdir -p "$(@D)"
-	@$(CCC) $(CCC_COMPILE) $< -o $(@)
+	@$(CCC) $(CCC_OPTS_COMPILE) $< -o $(@)
+	@echo "$@ compiled"
 
 build-all: $(o_files)
 
 build-sample: clean build-all
-	@$(CCC) -I build build/utils/string.o build/samples/sample.o -o sample
+	@echo "Link sample"
+	@$(CCC) $(CCC_OPTS) build/utils/string.o build/samples/sample.o -o sample
 
 
 .PHONY: destination source
