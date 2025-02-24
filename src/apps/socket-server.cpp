@@ -23,6 +23,14 @@ int main(int argc, char const *argv[])
                 app::utils::trim(lc);
                 std::transform(lc.begin(), lc.end(), lc.begin(), ::tolower);
 
+                if (lc.find("exit-full") != std::string::npos)
+                {
+                    conn.writeToSocket("Bye\n");
+                    close(conn.getSocket());
+                    break;
+                    break;
+                }
+
                 if (lc.find("exit") != std::string::npos)
                 {
                     conn.writeToSocket("Bye\n");
