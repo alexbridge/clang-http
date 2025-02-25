@@ -1,15 +1,17 @@
 #include <signal.h>
 #include <functional>
 #include "../../include/socket.h"
+#include <atomic>
 
-volatile sig_atomic_t stop{0};
+volatile std::atomic_int stop = std::atomic_int(0);
+volatile std::atomic<app::SocketServer *> server;
 
-inline std::function<void()> shutdown_handler;
-inline void signal_handler(int s)
+void signal_handler(int s)
 {
-    std::cout << "Signal: " << s << " stop: " << stop << std::endl;
-    shutdown_handler();
-    stop = 1;
+    std::cout << "Signal: " << s << " stop: " << stop << "\n";
+
+    server.load()->close();
+    stop++;
 }
 
 int main(int argc, char const *argv[])
@@ -19,18 +21,13 @@ int main(int argc, char const *argv[])
     {
         // Normally you'd spawn threads for multiple connections.
         app::SocketServer srv = app::SocketServer(8080);
-
-        auto shutdown_handler = [&srv]()
-        {
-            cout << "Server shutdown...\n";
-            // srv.close();
-        };
+        server.store(&srv);
 
         signal(SIGINT, signal_handler);
 
         while (!stop)
         {
-            cout << "Wait socket connection" << endl;
+            cout << "Wait socket connection\n";
 
             app::SocketClient conn = srv.waitForConnection();
 
@@ -50,7 +47,7 @@ int main(int argc, char const *argv[])
                     break;
                 }
 
-                cout << "[" << in << "]" << endl;
+                cout << "[" << in << "]\n";
 
                 conn.writeToSocket("Server got: " + in + "\n");
             }
@@ -58,8 +55,11 @@ int main(int argc, char const *argv[])
     }
     catch (exception &e)
     {
-        cerr << "Catch at: " << __LINE__ << ": " << e.what() << endl;
+        cerr << "Catch at: " << __LINE__ << ": " << e.what() << "\n";
         return EXIT_FAILURE;
     }
+
+    cout << "Server shutdown";
+
     return 0;
 }

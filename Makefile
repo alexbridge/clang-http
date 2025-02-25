@@ -54,7 +54,7 @@ build-all: $(ALL_CPP_O)
 build-socket-server-slim: clean-build build-all
 	@$(BUILDER) $(CCC) $(CCC_OPTS) $(NON_APPS_CPP_O) build/apps/socket-server.o -o bin/socket-server-slim
 
-run-socket-server-slim:
+run-socket-server-slim: build-socket-server-slim
 	$(RUNNER) ./bin/socket-server-slim
 
 
