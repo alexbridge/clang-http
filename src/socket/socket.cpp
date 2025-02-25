@@ -26,7 +26,7 @@ namespace app
     }
 }
 
-void app::Socket::closeSocket()
+void app::Socket::close()
 {
-    close(sock);
+    ::close(sock);
 }

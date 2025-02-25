@@ -14,10 +14,11 @@
 #include <cctype>
 #include <locale>
 #include "utils.h"
+#include "common.h"
 
 namespace app
 {
-    class Socket
+    class Socket : public app::Closable
     {
     private:
         int sock;
@@ -33,7 +34,7 @@ namespace app
 
         int getSocket();
 
-        void closeSocket();
+        void close();
     };
 
     class SocketClient : public Socket
@@ -43,7 +44,7 @@ namespace app
         explicit SocketClient(std::string address, unsigned short port);
     };
 
-    class SocketServer
+    class SocketServer : public app::Closable
     {
         Socket server;
         struct sockaddr_in address;

@@ -1,11 +1,10 @@
 #include <signal.h>
 #include <functional>
-#include "../../include/common.h"
 #include "../../include/socket.h"
 #include <atomic>
 
 volatile std::atomic_int stop = std::atomic_int(0);
-volatile std::atomic<app::Closable *> server;
+volatile std::atomic<app::SocketServer *> server;
 
 void signal_handler(int s)
 {
@@ -22,8 +21,7 @@ int main(int argc, char const *argv[])
     {
         // Normally you'd spawn threads for multiple connections.
         app::SocketServer srv = app::SocketServer(8080);
-        app::Closable *closable = &srv;
-        server.store(closable);
+        server.store(&srv);
 
         signal(SIGINT, signal_handler);
 

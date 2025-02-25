@@ -46,5 +46,5 @@ namespace app
 
 void app::SocketServer::close()
 {
-    server.closeSocket();
+    server.close();
 }
