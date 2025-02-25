@@ -32,6 +32,8 @@ namespace app
         void writeToSocket(std::string s);
 
         int getSocket();
+
+        void closeSocket();
     };
 
     class SocketClient : public Socket
@@ -51,6 +53,8 @@ namespace app
         explicit SocketServer(unsigned short port);
 
         SocketClient waitForConnection();
+
+        void close();
     };
 }
 

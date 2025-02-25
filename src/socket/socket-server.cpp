@@ -43,3 +43,8 @@ namespace app
         return SocketClient(new_socket);
     }
 }
+
+void app::SocketServer::close()
+{
+    server.closeSocket();
+}

@@ -6,20 +6,22 @@ CCC_OPTS_COMPILE := $(CCC_OPTS) -c
 
 IMAGE_BUILDER := clang/clang16:builder
 IMAGE_RUNNER := clang/clang16:runner
-BUILDER := docker run -it -v .:/app -w /app $(IMAGE_BUILDER)
-RUNNER := docker run -it -v .:/app -w /app -p 8080:8080 $(IMAGE_RUNNER)
-DOCKER_DEBIAN_12_IT := docker run -it -v .:/app -w /app debian:12-slim
-DOCKER_DEBIAN_12 := docker run -v .:/app -w /app -p 8090:8090 debian:12-slim
-
-NON_APPS_CPP := $(shell find src -name "*.cpp" ! -wholename "src/apps/*")
-# src/utils/string.cpp -> utils/string.cpp
-NON_APPS_CPP_RELATIVE := $(shell find src -name "*.cpp" ! -wholename "src/apps/*" | cut -c5-)
-NON_APPS_CPP_O := $(patsubst %.cpp,build/%.o,$(NON_APPS_CPP_RELATIVE))
+BUILDER := docker run -it -v .:/app -w /app --rm $(IMAGE_BUILDER)
+RUNNER := docker run -it -v .:/app -w /app -p 8080:8080 --rm $(IMAGE_RUNNER)
 
 tag-builder:
 	docker build -f ./docker/Builder -t $(IMAGE_BUILDER) .
 tag-runner:
 	docker build -f ./docker/Runner -t $(IMAGE_RUNNER) .
+exec-builder:
+	$(BUILDER) sh
+exec-runner:
+	$(RUNNER) sh
+
+NON_APPS_CPP := $(shell find src -name "*.cpp" ! -wholename "src/apps/*")
+# src/utils/string.cpp -> utils/string.cpp
+NON_APPS_CPP_RELATIVE := $(shell find src -name "*.cpp" ! -wholename "src/apps/*" | cut -c5-)
+NON_APPS_CPP_O := $(patsubst %.cpp,build/%.o,$(NON_APPS_CPP_RELATIVE))
 
 echo:
 	@echo $(NON_APPS_CPP_RELATIVE)
@@ -28,34 +30,32 @@ echo:
 	@echo $(ALL_CPP_O)
 
 build-socket-server:
-	@$(BUILDER) $(CCC) $(CCC_OPTS) $(NON_APPS_CPP) src/apps/socket-server.cpp -o socket-server
+	@$(BUILDER) $(CCC) $(CCC_OPTS) $(NON_APPS_CPP) src/apps/socket-server.cpp -o bin/socket-server
 run-socket-server:
-	$(DOCKER_DEBIAN_12) ./socket-server
-exec-builder:
-	$(BUILDER) sh
-exec-runner:
-	$(RUNNER) sh
+	$(RUNNER) ./bin/socket-server
 
 # ===== COMPILE AND LINK SEPARATELY
 ALL_CPP := $(shell find src -name "*.cpp")
 ALL_CPP_RELATIVE := $(shell find src -name "*.cpp")
 ALL_CPP_O := $(patsubst src/%.cpp,build/%.o,$(ALL_CPP_RELATIVE))
 
-clean:
-	rm -fr build
+clean-bin:
+	rm -fr bin/*
+clean-build:
+	rm -fr build/*
 
 build/%.o: src/%.cpp
 	@[ -d "$(@D)" ] || mkdir -p "$(@D)"
-	@$(CCC) $(CCC_OPTS_COMPILE) $< -o $(@)
+	@$(BUILDER) $(CCC) $(CCC_OPTS_COMPILE) $< -o $(@)
 	@echo "$@ compiled"
 
 build-all: $(ALL_CPP_O)
 
-build-socket-server-slim: clean build-all
-	@$(BUILDER) $(CCC) $(CCC_OPTS) $(NON_APPS_CPP_O) build/apps/socket-server.o -o socket-server-slim
+build-socket-server-slim: clean-build build-all
+	@$(BUILDER) $(CCC) $(CCC_OPTS) $(NON_APPS_CPP_O) build/apps/socket-server.o -o bin/socket-server-slim
 
 run-socket-server-slim:
-	$(RUNNER) ./socket-server-slim
+	$(RUNNER) ./bin/socket-server-slim
 
 
-.PHONY: destination source
+.PHONY: build-all

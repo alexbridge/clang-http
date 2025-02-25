@@ -25,3 +25,8 @@ namespace app
         return sock;
     }
 }
+
+void app::Socket::closeSocket()
+{
+    close(sock);
+}
