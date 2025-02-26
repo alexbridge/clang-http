@@ -34,7 +34,7 @@ namespace app
 
         int getSocket();
 
-        void close();
+        void close() override;
     };
 
     class SocketClient : public Socket
@@ -55,7 +55,35 @@ namespace app
 
         SocketClient waitForConnection();
 
-        void close();
+        void close() override;
+    };
+
+#define SOCKET_READER_BUFFER_SIZE 1024
+
+    class SocketStreambuf : public std::streambuf, public Closable
+    {
+    private:
+        int sockfd;
+        char buffer[SOCKET_READER_BUFFER_SIZE];
+
+    protected:
+        int underflow() override;
+
+    public:
+        explicit SocketStreambuf(int socket);
+
+        void close() override;
+    };
+
+    class SocketIstream : public std::istream, public Closable
+    {
+    private:
+        SocketStreambuf buf;
+
+    public:
+        explicit SocketIstream(int socket);
+
+        void close() override;
     };
 }
 

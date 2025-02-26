@@ -9,7 +9,13 @@ namespace app
     std::string Socket::readFromSocket()
     {
         char buffer[1024] = {0};
+
         int n = read(sock, buffer, sizeof(buffer));
+        if (n <= 0)
+        {
+            return "";
+        }
+
         std::string str = std::string(buffer, n);
         app::utils::trim(str);
         return str;

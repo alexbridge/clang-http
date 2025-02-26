@@ -23,11 +23,11 @@ namespace app
                 server.getSocket(),
                 (struct sockaddr *)&address,
                 sizeof(address)) < 0)
-            throw std::runtime_error("bind failed");
+            throw std::runtime_error("Bind failed");
 
         if (listen(server.getSocket(), 3) < 0)
         {
-            throw std::runtime_error("listen");
+            throw std::runtime_error("Listen error");
         }
     }
     SocketClient SocketServer::waitForConnection()
@@ -39,7 +39,10 @@ namespace app
             (struct sockaddr *)&address,
             (socklen_t *)&addrlen);
         if (new_socket < 0)
-            throw std::runtime_error("accept");
+        {
+            std::cerr << "Socket Accept failed\n";
+            throw std::runtime_error("Socket not accepted");
+        }
         return SocketClient(new_socket);
     }
 }

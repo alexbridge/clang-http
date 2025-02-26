@@ -20,10 +20,8 @@ int main(int argc, char const *argv[])
     using namespace std;
     try
     {
-        // Normally you'd spawn threads for multiple connections.
         app::SocketServer srv = app::SocketServer(8080);
-        app::Closable *closable = &srv;
-        server.store(closable);
+        server.store(&srv);
 
         signal(SIGINT, signal_handler);
 
@@ -33,19 +31,30 @@ int main(int argc, char const *argv[])
 
             app::SocketClient conn = srv.waitForConnection();
 
+            cout << "Socket connection\n";
+
+            // app::SocketIstream sock_in(conn.getSocket());
+
+            cout << "Socket-in\n";
+
             std::string in;
             while (!stop)
             {
                 in = conn.readFromSocket();
 
+                std::cout << in << "\n";
+
+                // getline(sock_in, in);
+
+                app::utils::trim(in);
+
                 std::string lc = std::string(in);
-                app::utils::trim(lc);
                 std::transform(lc.begin(), lc.end(), lc.begin(), ::tolower);
 
                 if (lc.find("exit") != std::string::npos)
                 {
                     conn.writeToSocket("Bye\n");
-                    close(conn.getSocket());
+                    conn.close();
                     break;
                 }
 
@@ -57,7 +66,7 @@ int main(int argc, char const *argv[])
     }
     catch (exception &e)
     {
-        cerr << "Catch at: " << __LINE__ << ": " << e.what() << "\n";
+        cerr << "Catch at: " << __LINE__ << ": " << typeid(e).name() << " " << e.what() << "\n";
         return EXIT_FAILURE;
     }
 
