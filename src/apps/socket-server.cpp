@@ -3,15 +3,24 @@
 #include "../../include/common.h"
 #include "../../include/socket.h"
 #include <atomic>
+#include <vector>
 
 volatile std::atomic_int stop = std::atomic_int(0);
 volatile std::atomic<app::Closable *> server;
+volatile std::atomic<app::Closable *> client;
 
 void signal_handler(int s)
 {
     std::cout << "Signal: " << s << " stop: " << stop << "\n";
 
+    auto cl = client.load();
+    if (cl)
+    {
+        cl->close();
+    }
+
     server.load()->close();
+
     stop++;
 }
 
@@ -31,20 +40,17 @@ int main(int argc, char const *argv[])
 
             app::SocketClient conn = srv.waitForConnection();
 
-            cout << "Socket connection\n";
+            client.store(&conn);
 
-            // app::SocketIstream sock_in(conn.getSocket());
+            cout << "Socket connected" << conn.getSocket() << "\n";
 
-            cout << "Socket-in\n";
+            app::SocketIstream sock_in(conn.getSocket());
 
             std::string in;
             while (!stop)
             {
-                in = conn.readFromSocket();
-
+                getline(sock_in, in);
                 std::cout << in << "\n";
-
-                // getline(sock_in, in);
 
                 app::utils::trim(in);
 

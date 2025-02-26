@@ -32,15 +32,14 @@ namespace app
     }
     SocketClient SocketServer::waitForConnection()
     {
-        int new_socket;
         int addrlen = sizeof(struct sockaddr_in);
-        new_socket = accept(
+        int new_socket = accept(
             server.getSocket(),
             (struct sockaddr *)&address,
             (socklen_t *)&addrlen);
         if (new_socket < 0)
         {
-            std::cerr << "Socket Accept failed\n";
+            std::cerr << "Socket Accept failed" << new_socket << "\n";
             throw std::runtime_error("Socket not accepted");
         }
         return SocketClient(new_socket);
