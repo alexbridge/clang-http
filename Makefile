@@ -13,6 +13,7 @@ tag-builder:
 	docker build -f ./docker/Builder -t $(IMAGE_BUILDER) .
 tag-runner:
 	docker build -f ./docker/Runner -t $(IMAGE_RUNNER) .
+tag: tag-builder tag-runner
 exec-builder:
 	$(BUILDER) sh
 exec-runner:
@@ -29,10 +30,10 @@ echo:
 	@echo $(ALL_CPP)
 	@echo $(ALL_CPP_O)
 
-build-socket-server:
-	@$(BUILDER) $(CCC) $(CCC_OPTS) $(NON_APPS_CPP) src/apps/socket-server.cpp -o bin/socket-server
-run-socket-server:
-	$(RUNNER) ./bin/socket-server
+# build-socket-server:
+# 	@$(BUILDER) $(CCC) $(CCC_OPTS) $(NON_APPS_CPP) src/apps/socket-server.cpp -o bin/socket-server
+# run-socket-server:
+# 	$(RUNNER) ./bin/socket-server
 
 # ===== COMPILE AND LINK SEPARATELY
 ALL_CPP := $(shell find src -name "*.cpp")
@@ -51,11 +52,11 @@ build/%.o: src/%.cpp
 
 build-all: $(ALL_CPP_O)
 
-build-socket-server-slim: clean-build build-all
-	@$(BUILDER) $(CCC) $(CCC_OPTS) $(NON_APPS_CPP_O) build/apps/socket-server.o -o bin/socket-server-slim
+build-socket-server: clean-build build-all
+	@$(BUILDER) $(CCC) $(CCC_OPTS) $(NON_APPS_CPP_O) build/apps/socket-server.o -o bin/socket-server
 
-run-socket-server-slim: build-socket-server-slim
-	$(RUNNER) ./bin/socket-server-slim
+run-socket-server: build-socket-server
+	$(RUNNER) ./bin/socket-server
 
 
 .PHONY: build-all

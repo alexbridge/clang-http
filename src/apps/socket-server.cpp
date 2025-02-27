@@ -5,32 +5,48 @@
 #include <atomic>
 #include <vector>
 
-volatile std::atomic_int stop = std::atomic_int(0);
-volatile std::atomic<app::Closable *> server;
-volatile std::atomic<app::Closable *> client;
+int stop;
+std::array<app::Closable *, 2> closables{nullptr, nullptr};
 
-void signal_handler(int s)
+void signal_handler(int signal)
 {
-    std::cout << "Signal: " << s << " stop: " << stop << "\n";
+    std::cout << "Signal: " << signal << " stop closables: " << stop << "\n";
 
-    auto cl = client.load();
-    if (cl)
+    for (size_t i = 0; i < closables.size(); i++)
     {
-        cl->close();
+        if (closables[i])
+        {
+            std::cout << "Stop closable: " << closables[i] << "\n";
+            closables[i]->close();
+            closables[i] = nullptr;
+        }
     }
 
-    server.load()->close();
+    stop = signal;
+}
 
-    stop++;
+void printClosables()
+{
+    std::cout << "\tClosables: ----- \n";
+    for (auto closable : closables)
+    {
+        std::cout << "\t\tClosable: " << closable << "\n";
+    }
+    std::cout << "------------\n";
 }
 
 int main(int argc, char const *argv[])
 {
     using namespace std;
+
+    printClosables();
+
     try
     {
         app::SocketServer srv = app::SocketServer(8080);
-        server.store(&srv);
+        closables[0] = &srv;
+
+        printClosables();
 
         signal(SIGINT, signal_handler);
 
@@ -40,9 +56,11 @@ int main(int argc, char const *argv[])
 
             app::SocketClient conn = srv.waitForConnection();
 
-            client.store(&conn);
-
             cout << "Socket connected" << conn.getSocket() << "\n";
+
+            closables[1] = &conn;
+
+            printClosables();
 
             app::SocketIstream sock_in(conn.getSocket());
 
@@ -50,7 +68,6 @@ int main(int argc, char const *argv[])
             while (!stop)
             {
                 getline(sock_in, in);
-                std::cout << in << "\n";
 
                 app::utils::trim(in);
 
@@ -60,7 +77,6 @@ int main(int argc, char const *argv[])
                 if (lc.find("exit") != std::string::npos)
                 {
                     conn.writeToSocket("Bye\n");
-                    conn.close();
                     break;
                 }
 
@@ -68,6 +84,11 @@ int main(int argc, char const *argv[])
 
                 conn.writeToSocket("Server got: " + in + "\n");
             }
+
+            conn.close();
+            closables[1] = nullptr;
+
+            printClosables();
         }
     }
     catch (exception &e)
