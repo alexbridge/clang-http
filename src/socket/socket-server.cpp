@@ -46,7 +46,7 @@ namespace app
     }
 }
 
-void app::SocketServer::close()
+void app::SocketServer::doClose()
 {
     server.close();
 }

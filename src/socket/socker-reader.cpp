@@ -22,7 +22,7 @@ namespace app
         return traits_type::to_int_type(*gptr());
     }
 
-    void SocketStreambuf::close()
+    void SocketStreambuf::doClose()
     {
         ::close(sockfd);
     }
@@ -31,7 +31,7 @@ namespace app
 
     SocketIstream::SocketIstream(int socket) : std::istream(&buf), buf(socket) {}
 
-    void SocketIstream::close()
+    void SocketIstream::doClose()
     {
         buf.close();
     }

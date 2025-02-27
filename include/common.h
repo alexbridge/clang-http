@@ -5,8 +5,13 @@ namespace app
 {
     class Closable
     {
+    protected:
+        virtual void doClose() = 0;
+
     public:
-        virtual void close() = 0;
+        bool closed;
+
+        void close();
     };
 }
 

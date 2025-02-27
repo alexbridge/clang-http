@@ -2,83 +2,20 @@
 #include <functional>
 #include "../../include/common.h"
 #include "../../include/socket.h"
+#include "../../include/misc.h"
 #include <atomic>
 #include <vector>
-
-class SignalHandler
-{
-private:
-    std::vector<app::Closable *> closables;
-
-public:
-    static SignalHandler *me;
-    int stopSignal;
-
-    SignalHandler(int sig, int capacity)
-    {
-        closables.resize(capacity);
-        std::cout << "Before me\n";
-        me = this;
-        std::cout << "After me\n";
-        signal(sig, SignalHandler::signalHandler);
-    };
-
-    void set(int index, app::Closable *closable)
-    {
-        closables.at(index) = closable;
-    }
-
-    void handleSignal(int signal)
-    {
-        std::cout << "Signal: " << signal << " stop: " << stopSignal << "\n";
-
-        for (auto closable : closables)
-        {
-            if (closable)
-            {
-                std::cout << "Stop closable: " << closable << "\n";
-                closable->close();
-                closable = nullptr;
-            }
-        }
-
-        closables.clear();
-        stopSignal = signal;
-    }
-
-    void printClosables()
-    {
-        std::cout << "\tClosables " << closables.size() << ": ----- \n";
-        for (auto closable : closables)
-        {
-            std::cout << "\t\tClosable: " << closable << "\n";
-        }
-        std::cout << "------------\n";
-    }
-
-    static void signalHandler(int signum)
-    {
-        std::cout << "signalHandler:" << me << "\n";
-
-        me->handleSignal(signum);
-    }
-
-    SignalHandler(SignalHandler &&) = delete;
-    SignalHandler(const SignalHandler &) = delete;
-    SignalHandler &operator=(SignalHandler &&) = delete;
-    SignalHandler &operator=(const SignalHandler &) = delete;
-};
-
-SignalHandler *SignalHandler::me;
 
 int main(int argc, char const *argv[])
 {
     using namespace std;
 
-    cout << "Me: " << SignalHandler::me << "\n ";
+    cout << "Me: " << app::SignalHandler::me << "\n ";
 
-    SignalHandler sigH(SIGINT, 2);
+    app::SignalHandler sigH(SIGINT, 2);
     sigH.printClosables();
+
+    cout << "Me after: " << app::SignalHandler::me << "\n ";
 
     try
     {
@@ -124,10 +61,14 @@ int main(int argc, char const *argv[])
                 conn.writeToSocket("Server got: " + in + "\n");
             }
 
-            conn.close();
-            sigH.set(1, nullptr);
+            std::cout << "Client stop and remove\n";
 
-            sigH.printClosables();
+            if (!conn.closed)
+            {
+                conn.close();
+                sigH.set(1, nullptr);
+                sigH.printClosables();
+            }
         }
     }
     catch (exception &e)
