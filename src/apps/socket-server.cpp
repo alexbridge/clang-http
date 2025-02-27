@@ -5,52 +5,91 @@
 #include <atomic>
 #include <vector>
 
-int stop;
-std::array<app::Closable *, 2> closables{nullptr, nullptr};
-
-void signal_handler(int signal)
+class SignalHandler
 {
-    std::cout << "Signal: " << signal << " stop closables: " << stop << "\n";
+private:
+    std::vector<app::Closable *> closables;
 
-    for (size_t i = 0; i < closables.size(); i++)
+public:
+    static SignalHandler *me;
+    int stopSignal;
+
+    SignalHandler(int sig, int capacity)
     {
-        if (closables[i])
+        closables.resize(capacity);
+        std::cout << "Before me\n";
+        me = this;
+        std::cout << "After me\n";
+        signal(sig, SignalHandler::signalHandler);
+    };
+
+    void set(int index, app::Closable *closable)
+    {
+        closables.at(index) = closable;
+    }
+
+    void handleSignal(int signal)
+    {
+        std::cout << "Signal: " << signal << " stop: " << stopSignal << "\n";
+
+        for (auto closable : closables)
         {
-            std::cout << "Stop closable: " << closables[i] << "\n";
-            closables[i]->close();
-            closables[i] = nullptr;
+            if (closable)
+            {
+                std::cout << "Stop closable: " << closable << "\n";
+                closable->close();
+                closable = nullptr;
+            }
         }
+
+        closables.clear();
+        stopSignal = signal;
     }
 
-    stop = signal;
-}
-
-void printClosables()
-{
-    std::cout << "\tClosables: ----- \n";
-    for (auto closable : closables)
+    void printClosables()
     {
-        std::cout << "\t\tClosable: " << closable << "\n";
+        std::cout << "\tClosables " << closables.size() << ": ----- \n";
+        for (auto closable : closables)
+        {
+            std::cout << "\t\tClosable: " << closable << "\n";
+        }
+        std::cout << "------------\n";
     }
-    std::cout << "------------\n";
-}
+
+    static void signalHandler(int signum)
+    {
+        std::cout << "signalHandler:" << me << "\n";
+
+        me->handleSignal(signum);
+    }
+
+    SignalHandler(SignalHandler &&) = delete;
+    SignalHandler(const SignalHandler &) = delete;
+    SignalHandler &operator=(SignalHandler &&) = delete;
+    SignalHandler &operator=(const SignalHandler &) = delete;
+};
+
+SignalHandler *SignalHandler::me;
 
 int main(int argc, char const *argv[])
 {
     using namespace std;
 
-    printClosables();
+    cout << "Me: " << SignalHandler::me << "\n ";
+
+    SignalHandler sigH(SIGINT, 2);
+    sigH.printClosables();
 
     try
     {
         app::SocketServer srv = app::SocketServer(8080);
-        closables[0] = &srv;
+        cout << "Before set\n";
+        sigH.set(0, &srv);
+        cout << "AFter set\n";
 
-        printClosables();
+        sigH.printClosables();
 
-        signal(SIGINT, signal_handler);
-
-        while (!stop)
+        while (!sigH.stopSignal)
         {
             cout << "Wait socket connection\n";
 
@@ -58,14 +97,14 @@ int main(int argc, char const *argv[])
 
             cout << "Socket connected" << conn.getSocket() << "\n";
 
-            closables[1] = &conn;
+            sigH.set(1, &conn);
 
-            printClosables();
+            sigH.printClosables();
 
             app::SocketIstream sock_in(conn.getSocket());
 
             std::string in;
-            while (!stop)
+            while (!sigH.stopSignal)
             {
                 getline(sock_in, in);
 
@@ -86,9 +125,9 @@ int main(int argc, char const *argv[])
             }
 
             conn.close();
-            closables[1] = nullptr;
+            sigH.set(1, nullptr);
 
-            printClosables();
+            sigH.printClosables();
         }
     }
     catch (exception &e)
