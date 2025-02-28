@@ -3,31 +3,13 @@
 #include "../../include/misc.h"
 #include "../../include/utils.h"
 
-int realGcd(int left, int right)
+int findGCD(int a, int b)
 {
-    // 130 mod 70
-    int remainder = left % right;
-    if (remainder <= 0)
+    if (a == 0)
     {
-        return right;
+        return b;
     }
-    // 70 mod 60
-    // 60 mod 10 => 6
-    return realGcd(right, remainder);
-}
-
-int gcd(int left, int right)
-{
-    if (left == right)
-    {
-        return left;
-    }
-
-    if (left > right)
-    {
-        return realGcd(left, right);
-    }
-    return realGcd(right, left);
+    return findGCD(b % a, a);
 }
 
 int main(int argc, char const *argv[])
@@ -55,8 +37,10 @@ int main(int argc, char const *argv[])
             int first, second;
             first = app::utils::str_to_int(firstStr);
             second = app::utils::str_to_int(secondStr);
+
+            int gcd = findGCD(first, second);
             std::cout
-                << "GCD(" << first << ", " << second << ") : " << gcd(first, second) << "\n";
+                << "GCD(" << first << ", " << second << ") : " << gcd << "\n";
         }
         catch (const std::invalid_argument &ignore)
         {
