@@ -2,9 +2,10 @@
 #define MISC_H
 
 #include <vector>
-#include "common.h"
 #include <iostream>
 #include <signal.h>
+#include <unistd.h>
+#include "common.h"
 
 namespace app
 {
@@ -16,8 +17,9 @@ namespace app
     public:
         static SignalHandler *me;
         int stopSignal;
+        bool closeStdin;
 
-        explicit SignalHandler(int sig, int capacity);
+        explicit SignalHandler(int sig, int capacity = 0, bool closeStdin = false);
 
         void set(int index, app::Closable *closable);
 
@@ -32,6 +34,7 @@ namespace app
             me->handleSignal(signum);
         }
 
+        SignalHandler() = default;
         SignalHandler(SignalHandler &&) = delete;
         SignalHandler(const SignalHandler &) = delete;
         SignalHandler &operator=(SignalHandler &&) = delete;

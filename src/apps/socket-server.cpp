@@ -1,21 +1,14 @@
-#include <signal.h>
-#include <functional>
-#include "../../include/common.h"
 #include "../../include/socket.h"
 #include "../../include/misc.h"
-#include <atomic>
-#include <vector>
 
 int main(int argc, char const *argv[])
 {
     using namespace std;
 
-    cout << "Me: " << app::SignalHandler::me << "\n ";
-
     app::SignalHandler sigH(SIGINT, 2);
     sigH.printClosables();
 
-    cout << "Me after: " << app::SignalHandler::me << "\n ";
+    cout << "Init signal handler: " << sigH.stopSignal << "\n ";
 
     try
     {

@@ -55,8 +55,13 @@ build-all: $(ALL_CPP_O)
 build-socket-server: clean-build build-all
 	@$(BUILDER) $(CCC) $(CCC_OPTS) $(NON_APPS_CPP_O) build/apps/socket-server.o -o bin/socket-server
 
-run-socket-server: build-socket-server
-	$(RUNNER) ./bin/socket-server
+run-socket-server: clean-bin build-all
+	@$(BUILDER) $(CCC) $(CCC_OPTS) $(NON_APPS_CPP_O) build/apps/socket-server.o -o bin/socket-server
+	@$(RUNNER) ./bin/socket-server
+
+run-cli-algs: clean-bin build-all
+	@$(BUILDER) $(CCC) $(CCC_OPTS) $(NON_APPS_CPP_O) build/apps/cli-algs.o -o bin/cli-algs
+	@$(RUNNER) ./bin/cli-algs
 
 
 .PHONY: build-all

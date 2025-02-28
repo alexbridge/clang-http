@@ -15,7 +15,7 @@ namespace app
         }
         catch (const std::invalid_argument &e)
         {
-            std::cerr << "Error parsing str" << str << " into int: " << e.what() << std::endl;
+            std::cerr << "Error parsing str: " << str << " to int: " << e.what() << "\n";
             throw e;
         }
     }
