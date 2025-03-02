@@ -3,13 +3,13 @@
 #include "../../include/misc.h"
 #include "../../include/utils.h"
 
-int findGCD(int a, int b)
+std::pair<int, int> findGCD(int a, int b, int iteration = 1)
 {
     if (a == 0)
     {
-        return b;
+        return std::pair{b, iteration};
     }
-    return findGCD(b % a, a);
+    return findGCD(b % a, a, ++iteration);
 }
 
 int main(int argc, char const *argv[])
@@ -38,9 +38,9 @@ int main(int argc, char const *argv[])
             first = app::utils::str_to_int(firstStr);
             second = app::utils::str_to_int(secondStr);
 
-            int gcd = findGCD(first, second);
+            auto [gcd, iterations] = findGCD(first, second);
             std::cout
-                << "GCD(" << first << ", " << second << ") : " << gcd << "\n";
+                << "GCD(" << first << ", " << second << ") = " << gcd << " iterations: " << iterations << "\n";
         }
         catch (const std::invalid_argument &ignore)
         {

@@ -11,28 +11,13 @@ namespace app
 
     int SocketStreambuf::underflow()
     {
-        int bytes = read(sockfd, buffer, SOCKET_READER_BUFFER_SIZE);
-        if (bytes <= 0)
+        ssize_t bytesRead = recv(sockfd, buffer, SOCKET_READER_BUFFER_SIZE, 0);
+        if (bytesRead <= 0)
         {
-            return traits_type::eof();
+            return EOF; // Error or end of stream
         }
+        setg(buffer, buffer, buffer + bytesRead);
 
-        setg(buffer, buffer, buffer + bytes);
-
-        return traits_type::to_int_type(*gptr());
-    }
-
-    void SocketStreambuf::doClose()
-    {
-        ::close(sockfd);
-    }
-
-    // === SocketIstream
-
-    SocketIstream::SocketIstream(int socket) : std::istream(&buf), buf(socket) {}
-
-    void SocketIstream::doClose()
-    {
-        buf.close();
+        return buffer[0];
     }
 }

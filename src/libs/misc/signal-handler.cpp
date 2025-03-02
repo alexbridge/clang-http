@@ -2,18 +2,18 @@
 
 namespace app
 {
-    SignalHandler *SignalHandler::me;
+    SignalHandler *SignalHandler::instance = nullptr;
 
-    SignalHandler::SignalHandler(int sig, int capacity, bool closeStdin) : stopSignal(0), closeStdin(closeStdin)
+    SignalHandler::SignalHandler(int sig, int capacity, bool closeStdin) : closeStdin(closeStdin)
     {
-        me = this;
+        instance = this;
 
         if (capacity > 0)
         {
             closables.resize(capacity);
         }
 
-        signal(sig, SignalHandler::signalHandler);
+        signal(sig, signalHandler);
     };
 
     void SignalHandler::set(int index, app::Closable *closable)
@@ -33,9 +33,9 @@ namespace app
 
         for (auto closable : closables)
         {
-            if (closable)
+            if (closable && !closable->closed)
             {
-                std::cout << "Stop closable: " << closable << "\n";
+                std::cout << "Close closable: " << closable << "\n";
                 closable->close();
             }
         }
@@ -60,7 +60,7 @@ namespace app
         std::cout << "\tClosables " << closables.size() << ": ----- \n";
         for (auto closable : closables)
         {
-            std::cout << "\t\tClosable: " << closable << "\n";
+            std::cout << "\t\tClosable: " << closable << "closed: " << (closable ? closable->closed : false) << "\n";
         }
         std::cout << "------------\n";
     }

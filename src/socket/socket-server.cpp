@@ -2,39 +2,37 @@
 
 namespace app
 {
-    SocketServer::SocketServer(unsigned short port)
+    SocketServer::SocketServer(SocketAddressIn &addressIn) : Socket(), SocketAddress(addressIn)
     {
         // Forcefully attaching socket to the port
-        int const options = setsockopt(
-            server.getSocket(),
+        int options = setsockopt(
+            sockFd,
             SOL_SOCKET,
             SO_REUSEADDR | SO_REUSEPORT,
-            &opt,
-            sizeof(opt));
+            &socketOptions,
+            sizeof(socketOptions));
         if (options < 0)
-            throw std::runtime_error("setsockopt");
+        {
+            throw std::runtime_error("set socket options");
+        }
 
-        address.sin_family = AF_INET;
-        address.sin_addr.s_addr = INADDR_ANY;
-        address.sin_port = htons(port);
+        // Forcefully attaching socket to the port
+        if (bind(sockFd, (struct sockaddr *)&address, sizeof(address)) < 0)
+        {
+            throw std::runtime_error("Bind to socket address failed");
+        }
 
-        // Forcefully attaching socket to the port 8080
-        if (bind(
-                server.getSocket(),
-                (struct sockaddr *)&address,
-                sizeof(address)) < 0)
-            throw std::runtime_error("Bind failed");
-
-        if (listen(server.getSocket(), 3) < 0)
+        if (listen(sockFd, 3) < 0)
         {
             throw std::runtime_error("Listen error");
         }
     }
-    SocketClient SocketServer::waitForConnection()
+
+    std::unique_ptr<Socket> SocketServer::waitForConnection()
     {
-        int addrlen = sizeof(struct sockaddr_in);
+        int addrlen = sizeof(address);
         int new_socket = accept(
-            server.getSocket(),
+            sockFd,
             (struct sockaddr *)&address,
             (socklen_t *)&addrlen);
         if (new_socket < 0)
@@ -42,11 +40,6 @@ namespace app
             std::cerr << "Socket Accept failed" << new_socket << "\n";
             throw std::runtime_error("Socket not accepted");
         }
-        return SocketClient(new_socket);
+        return std::make_unique<Socket>(new_socket);
     }
-}
-
-void app::SocketServer::doClose()
-{
-    server.close();
 }

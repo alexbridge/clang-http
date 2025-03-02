@@ -9,7 +9,7 @@ namespace app
         virtual void doClose() = 0;
 
     public:
-        bool closed;
+        bool closed = false;
 
         void close();
     };

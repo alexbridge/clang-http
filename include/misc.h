@@ -11,30 +11,33 @@ namespace app
 {
     class SignalHandler
     {
+
     private:
+        static SignalHandler *instance;
         std::vector<app::Closable *> closables;
+        bool closeStdin = false;
+
+    protected:
+        void handleSignal(int signal);
 
     public:
-        static SignalHandler *me;
-        int stopSignal;
-        bool closeStdin;
+        int stopSignal = 0;
 
         explicit SignalHandler(int sig, int capacity = 0, bool closeStdin = false);
 
         void set(int index, app::Closable *closable);
 
-        void handleSignal(int signal);
-
         void printClosables();
 
         static void signalHandler(int signum)
         {
-            std::cout << "signalHandler:" << me << "\n";
-
-            me->handleSignal(signum);
+            if (instance)
+            {
+                instance->handleSignal(signum);
+            }
         }
 
-        SignalHandler() = default;
+        SignalHandler() = delete;
         SignalHandler(SignalHandler &&) = delete;
         SignalHandler(const SignalHandler &) = delete;
         SignalHandler &operator=(SignalHandler &&) = delete;

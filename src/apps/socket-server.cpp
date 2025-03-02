@@ -12,31 +12,30 @@ int main(int argc, char const *argv[])
 
     try
     {
-        app::SocketServer srv = app::SocketServer(8080);
-        cout << "Before set\n";
-        sigH.set(0, &srv);
-        cout << "AFter set\n";
+        app::SocketAddressIn addressIn{"0.0.0.0", 8080};
 
+        app::SocketServer srv = app::SocketServer(addressIn);
+
+        sigH.set(0, &srv);
         sigH.printClosables();
 
         while (!sigH.stopSignal)
         {
             cout << "Wait socket connection\n";
 
-            app::SocketClient conn = srv.waitForConnection();
+            auto conn = srv.waitForConnection();
 
-            cout << "Socket connected" << conn.getSocket() << "\n";
-
-            sigH.set(1, &conn);
-
+            sigH.set(1, conn.get());
             sigH.printClosables();
 
-            app::SocketIstream sock_in(conn.getSocket());
+            app::SocketStreambuf sock_in(conn.get()->sockFd);
+
+            std::istream socketStream(&sock_in);
 
             std::string in;
             while (!sigH.stopSignal)
             {
-                getline(sock_in, in);
+                getline(socketStream, in);
 
                 app::utils::trim(in);
 
@@ -45,21 +44,20 @@ int main(int argc, char const *argv[])
 
                 if (lc.find("exit") != std::string::npos)
                 {
-                    conn.writeToSocket("Bye\n");
+                    conn.get()->writeToSocket("Bye\n");
                     break;
                 }
 
                 cout << "[" << in << "]\n";
 
-                conn.writeToSocket("Server got: " + in + "\n");
+                conn->writeToSocket("Server got: " + in + "\n");
             }
 
             std::cout << "Client stop and remove\n";
 
-            if (!conn.closed)
+            if (!conn.get()->closed)
             {
-                conn.close();
-                sigH.set(1, nullptr);
+                conn.get()->close();
                 sigH.printClosables();
             }
         }

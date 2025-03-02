@@ -1,8 +1,6 @@
 #ifndef CLANG_SOCKET_H
 #define CLANG_SOCKET_H
 
-// Adapted from C code example
-// at https://www.geeksforgeeks.org/socket-programming-cc/
 #include <stdio.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
@@ -20,47 +18,59 @@ namespace app
 {
     class Socket : public app::Closable
     {
-    private:
-        int sock;
+    protected:
+        void doClose() override;
 
     public:
-        explicit Socket(int socket);
+        int sockFd = 0;
 
         explicit Socket();
 
+        explicit Socket(int socket);
+
         std::string readFromSocket();
 
-        void writeToSocket(std::string s);
+        void writeToSocket(std::string str);
 
-        int getSocket();
-
-        void doClose() override;
+        ~Socket();
     };
 
-    class SocketClient : public Socket
+    struct SocketAddressIn
+    {
+        std::string ip;
+        unsigned short port;
+    };
+
+    class SocketAddress
     {
     public:
-        explicit SocketClient(int socket);
-        explicit SocketClient(std::string address, unsigned short port);
-    };
-
-    class SocketServer : public app::Closable
-    {
-        Socket server;
         struct sockaddr_in address;
-        int opt = 1;
+
+        explicit SocketAddress(SocketAddressIn &addressIn);
+    };
+
+    class SocketClient : public Socket, public SocketAddress
+    {
+    public:
+        explicit SocketClient(SocketAddressIn &addressIn);
+
+        void connect();
+    };
+
+    class SocketServer : public Socket, public SocketAddress
+    {
+    private:
+        int socketOptions;
 
     public:
-        explicit SocketServer(unsigned short port);
+        explicit SocketServer(SocketAddressIn &addressIn);
 
-        SocketClient waitForConnection();
-
-        void doClose() override;
+        std::unique_ptr<Socket> waitForConnection();
     };
 
 #define SOCKET_READER_BUFFER_SIZE 1024
 
-    class SocketStreambuf : public std::streambuf, public Closable
+    class SocketStreambuf : public std::streambuf
     {
     private:
         int sockfd;
@@ -71,19 +81,6 @@ namespace app
 
     public:
         explicit SocketStreambuf(int socket);
-
-        void doClose() override;
-    };
-
-    class SocketIstream : public std::istream, public Closable
-    {
-    private:
-        SocketStreambuf buf;
-
-    public:
-        explicit SocketIstream(int socket);
-
-        void doClose() override;
     };
 }
 

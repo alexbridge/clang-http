@@ -58,10 +58,20 @@ build-socket-server: clean-build build-all
 run-socket-server: clean-bin build-all
 	@$(BUILDER) $(CCC) $(CCC_OPTS) $(NON_APPS_CPP_O) build/apps/socket-server.o -o bin/socket-server
 	@$(RUNNER) ./bin/socket-server
+run-http-server: clean-bin build-all
+	@$(BUILDER) $(CCC) $(CCC_OPTS) $(NON_APPS_CPP_O) build/apps/http-server.o -o bin/http-server
+	@$(RUNNER) ./bin/http-server
 
 run-cli-algs: clean-bin build-all
 	@$(BUILDER) $(CCC) $(CCC_OPTS) $(NON_APPS_CPP_O) build/apps/cli-algs.o -o bin/cli-algs
 	@$(RUNNER) ./bin/cli-algs
+run-raw-socket: clean-bin build-all
+	@$(BUILDER) $(CCC) $(CCC_OPTS) $(NON_APPS_CPP_O) build/apps/raw-socket.o -o bin/raw-socket
+	@$(RUNNER) ./bin/raw-socket
+
+snippet-class:
+	@$(BUILDER) $(CCC) $(CCC_OPTS) snippets/class.cpp -o bin/snippet_class
+	@$(RUNNER) ./bin/snippet_class
 
 
 .PHONY: build-all

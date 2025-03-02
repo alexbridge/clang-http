@@ -2,15 +2,21 @@
 
 namespace app
 {
-    Socket::Socket(int socket) : sock(socket) {}
+    Socket::Socket(int socket) : sockFd(socket)
+    {
+        std::cout << "Socket::constructor(int socket): " << sockFd << std::endl;
+    }
 
-    Socket::Socket() : Socket(socket(AF_INET, SOCK_STREAM, 0)) {}
+    Socket::Socket() : Socket(socket(AF_INET, SOCK_STREAM, 0))
+    {
+        std::cout << "Socket::default constructor()" << sockFd << std::endl;
+    }
 
     std::string Socket::readFromSocket()
     {
         char buffer[1024] = {0};
 
-        int n = read(sock, buffer, sizeof(buffer));
+        int n = read(sockFd, buffer, sizeof(buffer));
         if (n <= 0)
         {
             return "";
@@ -23,16 +29,21 @@ namespace app
 
     void Socket::writeToSocket(std::string s)
     {
-        send(sock, s.c_str(), s.length(), 0);
+        send(sockFd, s.c_str(), s.length(), 0);
     }
 
-    int Socket::getSocket()
+    Socket::~Socket()
     {
-        return sock;
+        std::cout << "Socket::destructor: " << sockFd << std::endl;
+        doClose();
     }
-}
 
-void app::Socket::doClose()
-{
-    ::close(sock);
+    void Socket::doClose()
+    {
+        if (!closed)
+        {
+            std::cout << "Socket::close: " << sockFd << std::endl;
+            ::close(sockFd);
+        }
+    }
 }

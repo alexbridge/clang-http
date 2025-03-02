@@ -2,6 +2,7 @@
 #define MESSAGE_HTTP_PARSER_H
 
 #include "message.h"
+#include "http.h"
 
 namespace http
 {
