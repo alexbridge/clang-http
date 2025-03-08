@@ -2,6 +2,34 @@
 
 namespace app
 {
+    std::string httpMethodToString(HttpMethod method)
+    {
+
+        auto it = httpMethodToStrMap.find(method);
+        if (it != httpMethodToStrMap.end())
+        {
+            return it->second;
+        }
+        else
+        {
+            return "Unknown HttpMethod";
+        }
+    }
+
+    HttpMethod stringToHttpMethod(const std::string &str)
+    {
+
+        auto it = httpStrToMethodMap.find(str);
+        if (it != httpStrToMethodMap.end())
+        {
+            return it->second;
+        }
+        else
+        {
+            return HttpMethod::UNKNOWN;
+        }
+    }
+
     HttpMessageParser::HttpMessageParser(std::istream &sock_in) : sock_in(sock_in) {};
 
     HttpMessage HttpMessageParser::parse()
@@ -51,36 +79,24 @@ namespace app
             throw BadRequestException("Content length unkown");
         }
 
-        char buffer[contentLength];
+        std::getline(sock_in, request_line);
 
-        sock_in.read(buffer, contentLength);
-
-        std::cout << "Last: " << contentLength << ": " << buffer << std::endl;
-
-        std::cout << "\n--- End of HTTP Request ---\n";
-
-        return HttpMessage{method, path, http_version, headers, std::string(buffer)};
+        return HttpMessage{method, path, http_version, headers, request_line};
     }
 
-    HttpMethod HttpMessageParser::stringToHttpMethod(const std::string &str)
+    void HttpMessage::toString()
     {
-        static const std::map<std::string, HttpMethod> map = {
-            {"GET", HttpMethod::GET},
-            {"POST", HttpMethod::POST},
-            {"PUT", HttpMethod::PUT},
-            {"PATCH", HttpMethod::PATCH},
-            {"HEAD", HttpMethod::HEAD},
-            {"DELETE", HttpMethod::DELETE},
-            {"OPTIONS", HttpMethod::OPTIONS}};
+        std::cout
+            << "HTTP Message: " << httpMethodToString(method) << "\n";
+        std::cout << "Method: " << method << "\n";
+        std::cout << "Path: " << path << "\n";
+        std::cout << "Version: " << version << "\n";
+        for (const auto &entry : headers)
+        {
+            std::cout << entry.first << ": " << entry.second << "\n";
+        }
 
-        auto it = map.find(str);
-        if (it != map.end())
-        {
-            return it->second;
-        }
-        else
-        {
-            return HttpMethod::UNKNOWN;
-        }
+        std::cout << "Body: " << body << "\n";
     }
+
 }

@@ -8,8 +8,11 @@
 #include <vector>
 #include <iomanip> // For std::setw
 
-void printRawString(const char chars[], std::string prefix)
+void printRawString(const char *chars, size_t size, std::string prefix)
 {
+
+    std::cout << "Print char[] with size: " << size << ": " << prefix << std::endl;
+
     std::stringstream rawString;
     std::stringstream charsString;
     rawString << "R " + prefix + "\"("; // Start raw string literal
@@ -17,7 +20,7 @@ void printRawString(const char chars[], std::string prefix)
     int i = 0;
     char c;
 
-    while (i < 200)
+    while (i < size)
     {
         c = chars[i];
 
@@ -47,11 +50,11 @@ void printRawString(const char chars[], std::string prefix)
             break;
         }
 
-        charsString << "{" << static_cast<int>(c) << "}";
+        charsString << static_cast<int>(c) << ", ";
 
         if (c == '\0')
         {
-            break;
+            // break;
         }
 
         i++;
@@ -73,13 +76,19 @@ public:
 protected:
     int underflow() override
     {
-        ssize_t bytesRead = recv(socket_, buffer_, bufferSize - 1, 0);
+        std::cout << " ==== Wait bytes ==== " << __LINE__ << std::endl;
+        ssize_t bytesRead = recv(socket_, buffer_, bufferSize - 1, initial_read ? MSG_DONTWAIT : 0);
+        std::cout << " ==== Bytes received ==== " << bytesRead << std::endl;
         if (bytesRead > 0)
         {
+            if (bytesRead <= bufferSize)
+            {
+                initial_read = true;
+            }
+
             buffer_[bytesRead] = '\0';
             // printRawString(buffer_, "Buffer");
             //  printLine(buffer_);
-            //  std::cout << " ==== Bytes received ==== " << bytesRead << std::endl;
             setg(buffer_, buffer_, buffer_ + bytesRead);
             return buffer_[0];
         }
@@ -87,19 +96,20 @@ protected:
     }
 
 private:
-    static const int bufferSize = 1024;
+    static const int bufferSize = 50;
     int socket_;
     char buffer_[bufferSize];
+    bool initial_read = false;
 };
 
-int main()
+void playSocket()
 {
     // Example socket setup (replace with your actual socket code)
     int sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if (sockfd == -1)
     {
         std::cerr << "Error creating socket." << std::endl;
-        return 1;
+        return;
     }
 
     sockaddr_in serverAddr;
@@ -110,7 +120,7 @@ int main()
     if (bind(sockfd, (struct sockaddr *)&serverAddr, sizeof(serverAddr)) < 0)
     {
         std::cerr << "Bind failed" << std::endl;
-        return 1;
+        return;
     }
 
     listen(sockfd, 1);
@@ -118,7 +128,7 @@ int main()
     if (clientSocket < 0)
     {
         std::cerr << "Accept failed" << std::endl;
-        return 1;
+        return;
     }
     // End example socket setup
 
@@ -142,6 +152,8 @@ int main()
             }
         }
 
+        printRawString(line.c_str(), line.length() + 1, "Line: " + line);
+
         if (line == "\r" || line == "\r\n")
         {
             // Header separator
@@ -149,13 +161,12 @@ int main()
         }
     }
 
-    char buffer[contentLength];
+    std::cout << __LINE__ << "Content length: " << contentLength << typeid(contentLength).name() << std::endl;
 
-    socketStream.read(buffer, contentLength);
+    getline(socketStream, line);
+    std::cout << __LINE__ << ": " << line << std::endl;
 
-    printRawString(buffer, "last");
-
-    std::string response = "HTTP/1.1 200 \r\n"
+    std::string response = "HTTP/1.1 200 OK \r\n"
                            "Content-Type: text/plain \r\n"
                            "Connection: close \r\n";
 
@@ -163,5 +174,11 @@ int main()
 
     close(clientSocket);
     close(sockfd);
+}
+
+int main()
+{
+    playSocket();
+
     return 0;
 }

@@ -75,6 +75,7 @@ namespace app
     private:
         int sockfd;
         char buffer[SOCKET_READER_BUFFER_SIZE];
+        bool initial_read = false;
 
     protected:
         int underflow() override;

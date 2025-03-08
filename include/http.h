@@ -13,19 +13,40 @@
 #include <map>
 #include "socket.h"
 
+#define METHOD_ENUM(X) \
+    X(GET)             \
+    X(POST)            \
+    X(PUT)             \
+    X(PATCH)           \
+    X(HEAD)            \
+    X(DELETE)          \
+    X(OPTIONS)         \
+    X(UNKNOWN)
+
 namespace app
 {
     enum HttpMethod
     {
-        GET,
-        POST,
-        PUT,
-        PATCH,
-        HEAD,
-        DELETE,
-        OPTIONS,
-        UNKNOWN
+#define GENERATE_ENUM_VALUE(value) value,
+        METHOD_ENUM(GENERATE_ENUM_VALUE)
+#undef GENERATE_ENUM_VALUE
     };
+
+    static const std::map<HttpMethod, std::string> httpMethodToStrMap = {
+#define GENERATE_ENUM_NAME(value) {HttpMethod::value, #value},
+        METHOD_ENUM(GENERATE_ENUM_NAME)
+#undef GENERATE_ENUM_NAME
+    };
+
+    static const std::map<std::string, HttpMethod> httpStrToMethodMap = {
+#define GENERATE_ENUM_NAME(value) {#value, HttpMethod::value},
+        METHOD_ENUM(GENERATE_ENUM_NAME)
+#undef GENERATE_ENUM_NAME
+    };
+
+    std::string httpMethodToString(HttpMethod method);
+
+    HttpMethod stringToHttpMethod(const std::string &str);
 
     struct HttpMessage
     {
@@ -58,7 +79,6 @@ namespace app
 
         HttpMessage parse();
 
-        HttpMethod stringToHttpMethod(const std::string &str);
         HttpMessageParser() = delete;
         HttpMessageParser(HttpMessageParser const &) = delete;
         HttpMessageParser &operator=(HttpMessageParser const &) = delete;
@@ -75,7 +95,6 @@ namespace app
     public:
         BadRequestException(const std::string &message) : HttpClientError(message) {}
     };
-
 }
 
 #endif
