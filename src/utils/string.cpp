@@ -28,5 +28,19 @@ namespace app
                           .base(),
                       str.end());
         }
+
+        std::string join(std::vector<std::string_view> lines, std::string_view delimiter)
+        {
+            std::stringstream ss;
+            for (size_t i = 0; i < lines.size(); ++i)
+            {
+                ss << lines[i];
+                if (i < lines.size() - 1)
+                {
+                    ss << delimiter;
+                }
+            }
+            return ss.str();
+        }
     }
 }

@@ -12,6 +12,7 @@
 #include <cstring>
 #include <map>
 #include "socket.h"
+#include "http/http-header.h"
 
 #define METHOD_ENUM(X) \
     X(GET)             \

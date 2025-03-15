@@ -27,21 +27,23 @@ namespace app
 
             std::cout << "\n--- End of HTTP Message ---\n";
 
-            std::string response = "HTTP/1.1 200 OK \r\n"
-                                   "Content-Type: text/plain \r\n"
-                                   "Connection: close \r\n";
+            std::vector<std::string_view> response{
+                app::http::header::HTTP_OK,
+                app::http::header::CONTENT_TYPE + ": text/plain",
+                app::http::header::CONNECTION + ": close"};
 
-            sock->writeToSocket(response);
+            sock->writeToSocket(app::utils::join(response));
         }
         catch (const HttpClientError &e)
         {
             std::cerr << typeid(e).name() << ": " << e.what() << '\n';
 
-            std::string response = R"(
-                HTTP/1.1 400 Bad Request
-                Content-Type: text/plain
-                )";
-            sock->writeToSocket(response);
+            std::vector<std::string_view> response{
+                app::http::header::HTTP_BAD_REQUEST,
+                app::http::header::CONTENT_TYPE + ": text/plain",
+                app::http::header::CONNECTION + ": close"};
+
+            sock->writeToSocket(app::utils::join(response));
         }
     }
 }

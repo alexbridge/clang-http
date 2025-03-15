@@ -30,7 +30,7 @@ namespace app
 
         std::string readFromSocket();
 
-        void writeToSocket(std::string str);
+        void writeToSocket(const std::string &str);
 
         ~Socket();
     };

@@ -27,7 +27,7 @@ namespace app
         return str;
     }
 
-    void Socket::writeToSocket(std::string s)
+    void Socket::writeToSocket(const std::string &s)
     {
         send(sockFd, s.c_str(), s.length(), 0);
     }

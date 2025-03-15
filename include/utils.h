@@ -2,10 +2,12 @@
 #define CLANG_UTILS_H
 
 #include <string>
+#include <vector>
 #include <algorithm>
 #include <thread>
 #include <locale>
 #include <iostream>
+#include <sstream>
 #include <arpa/inet.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -18,13 +20,14 @@ namespace app
     namespace utils
     {
         long long usedRem();
-        int str_to_int(std::string &str);
 
-        int str_to_int(char const *str);
+        int str_to_int(std::string_view str);
 
         void trim(std::string &str);
         void ltrim(std::string &str);
         void rtrim(std::string &str);
+
+        std::string join(std::vector<std::string_view> lines, std::string_view delimiter = "\r\n");
     }
 }
 
