@@ -6,8 +6,9 @@ CCC_OPTS_COMPILE := $(CCC_OPTS) -c
 
 IMAGE_BUILDER := clang/clang16:builder
 IMAGE_RUNNER := clang/clang16:runner
+DOCKER_USER := --user "$$(id -u):$$(id -g)"
 BUILDER := docker run -it -v .:/app -w /app --rm $(IMAGE_BUILDER)
-RUNNER := docker run -it -v .:/app -w /app -p 8080:8080 --rm $(IMAGE_RUNNER)
+RUNNER := docker run -it $(DOCKER_USER) -v .:/app -w /app -p 8080:8080 --rm $(IMAGE_RUNNER)
 
 tag-builder:
 	docker build -f ./docker/Builder -t $(IMAGE_BUILDER) .
@@ -68,6 +69,9 @@ run-cli-algs: clean-bin build-all
 run-raw-socket: clean-bin build-all
 	@$(BUILDER) $(CCC) $(CCC_OPTS) $(NON_APPS_CPP_O) build/apps/raw-socket.o -o bin/raw-socket
 	@$(RUNNER) ./bin/raw-socket
+run-cli-io: clean-bin build-all
+	@$(BUILDER) $(CCC) $(CCC_OPTS) src/apps/cli-io.cpp -o bin/cli_io
+	@$(RUNNER) ./bin/cli_io
 
 snippet-class:
 	@$(BUILDER) $(CCC) $(CCC_OPTS) snippets/class.cpp -o bin/snippet_class
